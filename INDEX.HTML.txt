@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake USDT Balance</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        button { padding: 10px 20px; font-size: 16px; margin-top: 10px; cursor: pointer; }
+        #balance, #usdValue { font-size: 20px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Fake USDT Balance Checker</h2>
+    <button onclick="connectWallet()">Connect Wallet</button>
+    <p id="walletAddress"></p>
+    <p id="balance">Balance: --</p>
+    <p id="usdValue">USD Value: --</p>
+
+    <script>
+        const fakeUSDTAddress = "YOUR_FAKE_USDT_CONTRACT"; // Replace with your contract address
+        const priceOracleAddress = "YOUR_PRICE_ORACLE_CONTRACT"; // Replace with your oracle address
+        const abiFakeUSDT = [ /* Replace with your Fake USDT ABI */ ];
+        const abiPriceOracle = [ /* Replace with your Price Oracle ABI */ ];
+
+        let web3;
+        let account;
+
+        async function connectWallet() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                try {
+                    const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+                    account = accounts[0];
+                    document.getElementById("walletAddress").innerText = Wallet: ${account};
+                    getBalance();
+                } catch (error) {
+                    alert("Connection rejected!");
+                }
+            } else {
+                alert("Please install MetaMask or a Web3 wallet.");
+            }
+        }
+
+        async function getBalance() {
+            const usdtContract = new web3.eth.Contract(abiFakeUSDT, fakeUSDTAddress);
+            const oracleContract = new web3.eth.Contract(abiPriceOracle, priceOracleAddress);
+
+            try {
+                let balance = await usdtContract.methods.balanceOf(account).call();
+                let price = await oracleContract.methods.getUSDTPrice().call();
+
+                balance = web3.utils.fromWei(balance, "ether");
+                const usdValue = (parseFloat(balance) * parseFloat(web3.utils.fromWei(price, "ether"))).toFixed(2);
+
+                document.getElementById("balance").innerText = Balance: ${balance} USDT;
+                document.getElementById("usdValue").innerText = USD Value: $${usdValue};
+            } catch (error) {
+                console.error("Error fetching balance:", error);
+                alert("Error fetching balance. Check console.");
+            }
+        }
+    </script>
+</body>
+</html>
